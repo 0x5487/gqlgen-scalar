@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 type Int64 int64
@@ -22,4 +23,27 @@ func (i *Int64) UnmarshalGQL(v interface{}) error {
 // MarshalGQL implements the graphql.Marshaler interface
 func (i Int64) MarshalGQL(w io.Writer) {
 	fmt.Fprintf(w, `"%d"`, i)
+}
+
+type Banned bool
+
+func (b Banned) MarshalGQL(w io.Writer) {
+	if b {
+		w.Write([]byte("true"))
+	} else {
+		w.Write([]byte("false"))
+	}
+}
+
+func (b *Banned) UnmarshalGQL(v interface{}) error {
+	switch v := v.(type) {
+	case string:
+		*b = strings.ToLower(v) == "true"
+		return nil
+	case bool:
+		*b = Banned(v)
+		return nil
+	default:
+		return fmt.Errorf("%T is not a bool", v)
+	}
 }
