@@ -1,4 +1,4 @@
-package scalar
+package model
 
 import (
 	"fmt"
